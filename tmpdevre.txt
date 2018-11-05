@@ -1,6 +1,6 @@
 .include	baskadevre.txt
-.giris	b	#girisler
-.cikis	f	#cikis
+.giris	b
+.cikis	f
 .kapi	NAND	2	e	b	c	1
 .kapi	XOR	2	f	d	e	1
 .son

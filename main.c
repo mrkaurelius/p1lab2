@@ -9,24 +9,10 @@
 char * pathKOM();
 char * pathDEG();
 char * pathDEV();
+char * getParams(const char * promptBuf);
+
 void addPrompt(const char * promptBuf);
 int getPrompt();
-
-char * getParams(const char * promptBuf){
-	int k = 0,i;
-	char * params = malloc(sizeof(char));
-	for (i = 1; promptBuf[i] != '\0'; i++) {
-		if ((int)promptBuf[i] > 96 && (int)promptBuf[i] < 123 ) {
-			params[k] = promptBuf[i];
-			k++;
-			params = realloc(params,k + 1);
-		}
-	}
-	params[k] = '\0';
-	//for (i = 0; i < k; i++) printf("params -> %c \n",params[i] )
-
-	return params;
-}
 
 void lowDEG(const char * promptBuf){
 	int i;
@@ -42,35 +28,86 @@ void lowDEG(const char * promptBuf){
 	int paramSize = 0;
 	//for (i = 0; params[i] != '\0'; i++) printf("params -> %c \n",params[i] )
 	for (i = 0; params[i] != '\0'; i++) paramSize++;
-	printf("paramsize -> %d\n",paramSize );
+	//printf("paramsize -> %d\n",paramSize );
 	// DOSYAYI ISLEME
-	for (i = 0; i <  ; i++) {
+	// ANA GIRIS CIKISLARI BUL
+}
 
+char * getMainIO(int flag){
+	//include edebildikten sonra bununla uğraş
+	char * devPath = pathDEV();
+	FILE * DEV;
+	DEV = fopen(devPath,"r");
+	if (DEV == NULL) {
+		printf("!ANA GIRIS CIKIS ICIN DEVRE.TXT ACILAMADI");
+		return 0;
 	}
+	if (flag == 1) {
+		int i;
+		char * ptr = malloc(sizeof(char));
 
+		//GIRISILERI OKU
+		return ptr;
+	}if (flag == 0) {
+		//CIKISICIKISLARI OKU
+	}
 }
 
 int initDEV(const char * promptBuf){
+	// include bitmeden digerlerine gecme
+	// DEGER RETURN ETMEK YERINE DEVRE.TXT YI DEGISTIR
+	// devre.txt işle ve master.txt de birleştir sonra tmp sonra rename yap (tmp)?
 	char * devPath = pathDEV();
+	int incFlag = 0;
 	FILE * DEV;
 	DEV = fopen(devPath,"r");
 	if (DEV == NULL) {
 		printf("!DEVRE.TXT ACILAMADI\n");
 		return 0;
 	}else{
-		printf("DEVRE.TXT ACILDI\n" );
+		int i;
+		printf("DEVRE.TXT OKUMA YAZMA MODUNDA ACILDI\n" );
+		// TMP OLUSTUR FSCANF ILE STREAMIN SONUNA KADAR TARA # YORUMLARI ATLA
+		// YORUMDAN ARINDIR DOSYAYI BUFFER A AL ? TMP DOSYAYA AL
+		FILE * tmpDEV;
+		tmpDEV = fopen("tmpdevre.txt","w");
+		//foef The C library function int feof(FILE *stream) tests the end-of-file indicator for the given stream.
+		while (!feof(DEV)) {
+			char buf[100];
+			fgets(buf,100,DEV);
+			for (i = 0; i < 100 ; i++) {
+				if (buf[i] == '#') {
+					buf[i - 1] = '\n';
+					buf[i] = '\0';
+					break;
+				}
+			}
+			if( strstr(buf,".include") != NULL ){
+				incFlag++;
+				//INCLUDE GEREK VARMI continue;
+			}
+			fputs(buf,tmpDEV);
+			if (strstr(buf,".son") != NULL) {
+				printf("buf -> %s\n",buf );
+				// ikikere .son yazmasının sebebi ?? (stream feof loop)
+				break;
+			}
+		}
+		fclose(tmpDEV);
+	}
+	//printf("incflag -> %d\n",incFlag );
+	if(incFlag){
+		FILE * baskaDEV;
+		baskaDEV = fopen("baskadevre.txt","r");
 	}
 	/*
 
-
 	*/
-	printf("DEVRE.TXT KAPANDI\n" );
 	fclose(DEV);
+	printf("DEVRE.TXT KAPANDI\n" );
 	return 1;
 }
-/*
-		H VE L KOMUTLARINI IMPEMENT ET
-*/
+
 int main(){
 	printf(">>> KAPI SIMULATORU \n" );
 	getPrompt();
@@ -109,6 +146,21 @@ int getPrompt(){
 		printf("!HATALI GIRDI\n");
 	}
 	return 0;
+}
+
+char * getParams(const char * promptBuf){
+	int k = 0,i;
+	char * params = malloc(sizeof(char));
+	for (i = 1; promptBuf[i] != '\0'; i++) {
+		if ((int)promptBuf[i] > 96 && (int)promptBuf[i] < 123 ) {
+			params[k] = promptBuf[i];
+			k++;
+			params = realloc(params,k + 1);
+		}
+	}
+	params[k] = '\0';
+	//for (i = 0; i < k; i++) printf("params -> %c \n",params[i] )
+	return params;
 }
 
 void addPrompt(const char * promptBuf){
